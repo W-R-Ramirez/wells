@@ -1,0 +1,93 @@
+"""
+index in holes for location (x,y) is 
+i = (y-1)*7 + x - 1
+"""
+class Hole:
+    def __init__(self, depth, location):
+        self.depth = depth
+        self.cur_level = 0
+        self.x, self.y = location
+        self.neighbors = []
+        self.lower_neighbors = []
+    
+    """
+    neighbors for hole x,y are 
+    x+1, y -> i = (y-1)*7 + x
+    x-1, y -> i = (y-1)*7 + x-2
+    x, y+1 -> i = (y)*7 + x-1
+    x, y-1 -> i = (y-2)*7 + x-1
+    """
+    def find_neighbors(self):
+        #RIGHT 
+        if self.x != 7:
+            num = (self.y-1)*7 + self.x
+            if num > -1 and num < 50:
+                self.neighbors.append(holes[num])
+        #LEFT
+        if self.x != 1:
+            num = (self.y-1)*7 + self.x-2
+            if num > -1 and num < 50:
+                self.neighbors.append(holes[num])
+        #UP
+        if self.y != 1:
+            num = (self.y-2)*7 + self.x-1
+            if num > -1 and num < 50:
+                self.neighbors.append(holes[num])
+        #DOWN
+        if self.y != 7:
+            num = self.y*7 + self.x-1
+            if num > -1 and num < 50:
+                self.neighbors.append(holes[num])
+        for hole in self.neighbors:
+            if hole.depth > self.depth:
+                self.lower_neighbors.append(hole)
+
+    
+    def fill(self, volume):
+        to_fill = []
+        for hole in self.neighbors:
+            if hole.depth - hole.cur_level > self.depth - self.cur_level:
+                to_fill.append(hole)
+        if len(to_fill) != 0:
+            amount_to_pass = float(volume)/len(to_fill)
+            for hole in to_fill:
+                hole.fill(amount_to_pass)
+        else:
+            self.cur_level = self.cur_level + volume
+
+
+depths = [1,5,27,22,28,40,14,39,13,17,30,41,12,2,
+          32,35,24,25,19,47,34,16,33,10,42,7,44,18,
+          3,8,45,37,4,21,20,15,46,35,6,26,48,49,
+          9,23,31,29,11,36,43]
+k = 0
+"""
+index in holes for location (x,y) is 
+i = (y-1)*7 + x - 1
+"""
+holes = []
+goal_hole = ""
+first_hole = ""
+for i in range(7):
+    for j in range(7):
+        location = (j+1,i+1)
+        hole = Hole(depths[k], location)
+        if j == 0 and i == 0:
+            first_hole = hole
+        if j == 6 and i == 6:
+            goal_hole = hole
+        holes.append(hole)
+
+    
+
+for hole in holes:
+    print hole.depth, hole.cur_level
+    hole.find_neighbors()
+time = 0
+while goal_hole.cur_level == 0:
+    time = time + 1
+    first_hole.fill(1)
+    print time
+
+for hole in holes:
+    print hole.depth, hole.cur_level
